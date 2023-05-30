@@ -16,7 +16,6 @@ class UserController extends Controller {
 
     // 判断名字是否存在重复
     const userInfo = await ctx.service.user.getUserByName(username);
-    console.log('看看用户信息', userInfo);
     if (userInfo && userInfo.id) {
       setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '账户名已被注册，请重新输入');
     } else {
