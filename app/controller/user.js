@@ -56,6 +56,21 @@ class UserController extends Controller {
 
     setResponse(ctx, httpCode.SUCCESS, '登录成功', { token });
   }
+
+  async getUserInfo() {
+    const { ctx, app } = this;
+    const token = ctx.request.header.authorization;
+    // 通过 app.jwt.verify 方法，解析出 token 内的用户信息
+    const decode = app.jwt.verify(token, app.config.jwt.secret);
+    // 通过 getUserByName 方法，以用户名 decode.username 为参数，从数据库获取到该用户名下的相关信息
+    const userInfo = await ctx.service.user.getUserByName(decode.username);
+    setResponse(ctx, httpCode.SUCCESS, null, {
+      id: userInfo.id,
+      username: userInfo.username,
+      signature: userInfo.signature,
+      avatar: userInfo.avatar || defaultAvatar,
+    });
+  }
 }
 
 module.exports = UserController;
