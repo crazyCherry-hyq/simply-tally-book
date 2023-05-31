@@ -1,5 +1,5 @@
 'use strict';
-const { setResponse } = require('../util/common');
+const { setResponse, encryptPassword } = require('../util/common');
 const { httpCode } = require('../constant/httpCode');
 const Controller = require('egg').Controller;
 const defaultAvatar = 'http://s.yezgea02.com/1615973940679/WeChat77d6d2ac093e247c361f0b8a7aeb6c2a.png'; // 默认头像
@@ -19,9 +19,10 @@ class UserController extends Controller {
     if (userInfo && userInfo.id) {
       setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '账户名已被注册，请重新输入');
     } else {
+      const encryptedPassword = encryptPassword(password);
       const result = await ctx.service.user.register({
         username,
-        password,
+        password: encryptedPassword,
         signature: '嘿嘿',
         avatar: defaultAvatar,
       });
