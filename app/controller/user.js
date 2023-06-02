@@ -71,6 +71,34 @@ class UserController extends Controller {
       avatar: userInfo.avatar || defaultAvatar,
     });
   }
+
+  async editUserInfo() {
+    const { ctx, app } = this;
+    // 通过 post 请求，在请求体中获取签名字段 signature
+    const { signature = '', avatar = '' } = ctx.request.body;
+
+    try {
+      const token = ctx.request.header.authorization;
+      const decode = app.jwt.verify(token, app.config.jwt.secret);
+      if (!decode) return;
+      const userId = decode.id;
+      const userInfo = await ctx.service.user.getUserByName(decode.username);
+      await ctx.service.user.editUserInfo({
+        ...userInfo,
+        signature,
+        avatar,
+      });
+      setResponse(ctx, httpCode.SUCCESS, null, {
+        id: userId,
+        username: userInfo.username,
+        signature,
+        avatar,
+      });
+    } catch (error) {
+      return null;
+    }
+  }
+
 }
 
 module.exports = UserController;
