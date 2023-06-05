@@ -111,6 +111,30 @@ class BillController extends Controller {
       setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
     }
   }
+
+  // 获取账单详情
+  async getBillDetail() {
+    const { ctx, app } = this;
+    const { id = '' } = ctx.query;
+
+    if (!id) {
+      setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '订单id不能为空');
+    }
+
+    // 获取当前用户信息
+    const token = ctx.request.header.authorization;
+    const decode = await app.jwt.verify(token, app.config.jwt.secret);
+
+    if (!decode) return;
+    const user_id = decode.id;
+
+    try {
+      const result = await ctx.service.bill.getBillDetail(id, user_id);
+      handleResponse(ctx, result, '请求成功', result);
+    } catch (error) {
+      setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
+    }
+  }
 }
 
 module.exports = BillController;

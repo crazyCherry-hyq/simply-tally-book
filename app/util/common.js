@@ -13,9 +13,9 @@ function setResponse(ctx, code, msg, data = null) {
 }
 
 // 处理发送接口响应的接口处理方式
-function handleResponse(ctx, successStatus, message) {
+function handleResponse(ctx, successStatus, message, result) {
   const code = successStatus ? httpCode.SUCCESS : httpCode.INTERNAL_SERVER_ERROR;
-  setResponse(ctx, code, successStatus ? message : '报错啦');
+  setResponse(ctx, code, successStatus ? message : '报错啦', result);
 }
 
 function encryptPassword(password) {
