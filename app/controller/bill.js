@@ -1,7 +1,7 @@
 'use strict';
 
 const moment = require('moment');
-const { setResponse } = require('../util/common');
+const { setResponse, handleResponse } = require('../util/common');
 const { httpCode } = require('../constant/httpCode');
 const Controller = require('egg').Controller;
 
@@ -25,7 +25,7 @@ class BillController extends Controller {
       const user_id = decode.id;
       // user_id 默认添加到每个账单项，作为后续获取指定用户账单的标示。
       // 可以理解为，我登陆了A账单，那么所做的操作都得加上A账户的id，后续获取的时候，就过滤出A的账单
-      await ctx.service.bill.add({
+      const result = await ctx.service.bill.add({
         amount,
         type_id,
         type_name,
@@ -34,7 +34,7 @@ class BillController extends Controller {
         remark,
         user_id,
       });
-      setResponse(ctx, httpCode.SUCCESS, '新增成功');
+      handleResponse(ctx, result, '新增成功');
     } catch (error) {
       setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
     }
@@ -95,7 +95,7 @@ class BillController extends Controller {
           curr.push({ date, bills: [ item ] });
         }
         return curr;
-      }, []).sort((a, b) => moment(b.date) - moment(a.date));
+      }, []).sort((a, b) => moment(b.bill_date) - moment(a.bill_date));
 
       // 分页处理，listMap 为我们格式化后的全部数据，还为分页
       const filterListMap = listMap.slice((page - 1) * page_size, page * page_size);
