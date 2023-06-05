@@ -54,6 +54,19 @@ class BillService extends Service {
       return null;
     }
   }
+
+  // 删除账单接口
+  async delete(id, user_id) {
+    const { app } = this;
+    try {
+      const result = await app.mysql.delete('bill', { id, user_id });
+      return result;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
 }
 
 module.exports = BillService;

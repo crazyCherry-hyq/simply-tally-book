@@ -162,7 +162,81 @@ class BillController extends Controller {
         remark,
         user_id,
       });
-      handleResponse(ctx, result, null);
+      handleResponse(ctx, result, '修改成功');
+    } catch (error) {
+      setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
+    }
+  }
+
+  // 删除账单接口
+  async delete() {
+    const { ctx, app } = this;
+    const { id } = ctx.request.body;
+
+    const token = ctx.request.header.authorization;
+    const decode = app.jwt.verify(token, app.config.jwt.secret);
+    if (!decode) return;
+    const user_id = decode.id;
+    try {
+      const result = await ctx.service.bill.delete(id, user_id);
+      handleResponse(ctx, result, '删除成功');
+    } catch (error) {
+      setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
+    }
+  }
+
+  // 获取账单图标统计出来的数据
+  async statistics() {
+    const { ctx, app } = this;
+    const { date = '' } = ctx.query;
+
+    const token = ctx.request.header.authorization;
+    const decode = app.jwt.verify(token, app.config.jwt.secret);
+    if (!decode) return;
+    const user_id = decode.id;
+    try {
+      const result = await ctx.service.bill.list(user_id);
+
+      const start = moment(date).startOf('month').unix() * 1000; // 选择月份，月初时间
+      const end = moment(date).endOf('month').unix() * 1000; // 选择月份，月末时间
+      const _data = result.filter(item => (Number(item.bill_date)) > start && (Number(item.bill_date)) < end);
+
+      // 总支出
+      const total_expense = _data.reduce((arr, curr) => {
+        if (curr.pay_type === 1) {
+          arr += Number(curr.amount);
+        }
+        return arr;
+      }, 0);
+
+      // 总收入
+      const total_income = _data.reduce((arr, curr) => {
+        if (curr.pay_type === 2) {
+          arr += Number(curr.amount);
+        }
+        return arr;
+      }, 0);
+
+      let total_data = _data.reduce((arr, curr) => {
+        const index = arr.findIndex(item => item.type_id === curr.type_id);
+        if (index === -1) {
+          arr.push({ ...curr, number: Number(curr.amount) });
+        } else {
+          arr[index].number += Number(curr.amount);
+        }
+        return arr;
+      }, []);
+
+      total_data = total_data.map(item => {
+        item.number = Number(Number(item.number).toFixed(2));
+        return item;
+      });
+
+      setResponse(ctx, httpCode.SUCCESS, {
+        total_income: Number(total_income).toFixed(2),
+        total_expense: Number(total_expense).toFixed(2),
+        total_data: total_data || [],
+      });
     } catch (error) {
       setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
     }
