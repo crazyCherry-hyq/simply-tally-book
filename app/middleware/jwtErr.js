@@ -8,6 +8,7 @@ module.exports = secret => {
     const token = ctx.request.header.authorization;
     let decode;
     if (token !== 'null' && token) {
+      console.log('token', token);
       try {
         decode = ctx.app.jwt.verify(token, secret);
         await next();
