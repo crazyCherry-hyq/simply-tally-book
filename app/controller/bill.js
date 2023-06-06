@@ -9,7 +9,7 @@ class BillController extends Controller {
   // 新增账单
   async add() {
     // 获取请求中携带的参数
-    const { ctx, app } = this;
+    const { ctx } = this;
     const { amount, type_id, type_name, bill_date, pay_type, remark = '' } = ctx.request.body;
 
     // 判空处理
@@ -18,11 +18,8 @@ class BillController extends Controller {
     }
 
     try {
-      const token = ctx.request.header.authorization;
-      // 拿到token之后去获取用户信息
-      const decode = app.jwt.verify(token, app.config.jwt.secret);
-      if (!decode) return;
-      const user_id = decode.id;
+      // 获取用户id 从中间件传递的信息中获取用户id
+      const user_id = ctx.state.userInfo.id;
       // user_id 默认添加到每个账单项，作为后续获取指定用户账单的标示。
       // 可以理解为，我登陆了A账单，那么所做的操作都得加上A账户的id，后续获取的时候，就过滤出A的账单
       const result = await ctx.service.bill.add({
@@ -42,16 +39,14 @@ class BillController extends Controller {
 
   // 获取账单列表
   async list() {
-    const { ctx, app } = this;
+    const { ctx } = this;
     // 获取， 日期 date， 分页数据， 类型 type_id, 这些都是前端传给后端的数据
     const { date, page = 1, page_size = 5, type_id = 'all' } = ctx.query;
 
     try {
-      const token = ctx.request.header.authorization;
-      const decode = app.jwt.verify(token, app.config.jwt.secret);
+      // 获取用户id 从中间件传递的信息中获取用户id
+      const user_id = ctx.state.userInfo.id;
 
-      if (!decode) return;
-      const user_id = decode.id;
       const list = await ctx.service.bill.list(user_id, page);
 
       let totalExpendAmount = 0;
@@ -111,20 +106,14 @@ class BillController extends Controller {
 
   // 获取账单详情
   async getBillDetail() {
-    const { ctx, app } = this;
+    const { ctx } = this;
     const { id = '' } = ctx.query;
 
     if (!id) {
       setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '订单id不能为空');
     }
-
-    // 获取当前用户信息
-    const token = ctx.request.header.authorization;
-    const decode = await app.jwt.verify(token, app.config.jwt.secret);
-
-    if (!decode) return;
-    const user_id = decode.id;
-
+    // 获取用户id 从中间件传递的信息中获取用户id
+    const user_id = ctx.state.userInfo.id;
     try {
       const result = await ctx.service.bill.getBillDetail(id, user_id);
       handleResponse(ctx, result, '请求成功', result);
@@ -135,7 +124,7 @@ class BillController extends Controller {
 
   // 编辑账单接口
   async update() {
-    const { ctx, app } = this;
+    const { ctx } = this;
     // 账单的相关参数，这里注意要把账单的id也传进去
     const { id, amount, type_id, type_name, bill_date, pay_type, remark = '' } = ctx.request.body;
     // 判空处理
@@ -144,10 +133,8 @@ class BillController extends Controller {
     }
 
     try {
-      const token = ctx.request.header.authorization;
-      const decode = app.jwt.verify(token, app.config.jwt.secret);
-      if (!decode) return;
-      const user_id = decode.id;
+      // 获取用户id 从中间件传递的信息中获取用户id
+      const user_id = ctx.state.userInfo.id;
       // 根据账单 id 和 user_id，修改账单数据
       const result = await ctx.service.bill.update({
         id,
@@ -167,13 +154,12 @@ class BillController extends Controller {
 
   // 删除账单接口
   async delete() {
-    const { ctx, app } = this;
+    const { ctx } = this;
     const { id } = ctx.request.body;
 
-    const token = ctx.request.header.authorization;
-    const decode = app.jwt.verify(token, app.config.jwt.secret);
-    if (!decode) return;
-    const user_id = decode.id;
+    // 获取用户id 从中间件传递的信息中获取用户id
+    const user_id = ctx.state.userInfo.id;
+    console.log('user_id', user_id);
     try {
       const result = await ctx.service.bill.delete(id, user_id);
       handleResponse(ctx, result, '删除成功');
@@ -184,13 +170,11 @@ class BillController extends Controller {
 
   // 获取账单图标统计出来的数据
   async statistics() {
-    const { ctx, app } = this;
+    const { ctx } = this;
     const { date = '' } = ctx.query;
 
-    const token = ctx.request.header.authorization;
-    const decode = app.jwt.verify(token, app.config.jwt.secret);
-    if (!decode) return;
-    const user_id = decode.id;
+    // 获取用户id 从中间件传递的信息中获取用户id
+    const user_id = ctx.state.userInfo.id;
     try {
       const result = await ctx.service.bill.list(user_id);
 

@@ -11,6 +11,8 @@ module.exports = secret => {
       console.log('token', token);
       try {
         decode = ctx.app.jwt.verify(token, secret);
+        if (!decode) return;
+        ctx.state.userInfo = decode;
         await next();
       } catch (error) {
         console.log('error', error);

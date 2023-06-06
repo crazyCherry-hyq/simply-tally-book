@@ -58,12 +58,9 @@ class UserController extends Controller {
   }
 
   async getUserInfo() {
-    const { ctx, app } = this;
-    const token = ctx.request.header.authorization;
-    // 通过 app.jwt.verify 方法，解析出 token 内的用户信息
-    const decode = app.jwt.verify(token, app.config.jwt.secret);
+    const { ctx } = this;
     // 通过 getUserByName 方法，以用户名 decode.username 为参数，从数据库获取到该用户名下的相关信息
-    const userInfo = await ctx.service.user.getUserByName(decode.username);
+    const userInfo = await ctx.service.user.getUserByName(ctx.state.userInfo.username);
     setResponse(ctx, httpCode.SUCCESS, null, {
       id: userInfo.id,
       username: userInfo.username,
@@ -73,23 +70,21 @@ class UserController extends Controller {
   }
 
   async editUserInfo() {
-    const { ctx, app } = this;
+    const { ctx } = this;
     // 通过 post 请求，在请求体中获取签名字段 signature
     const { signature = '', avatar = '' } = ctx.request.body;
 
     try {
-      const token = ctx.request.header.authorization;
-      const decode = app.jwt.verify(token, app.config.jwt.secret);
-      if (!decode) return;
-      const userId = decode.id;
-      const userInfo = await ctx.service.user.getUserByName(decode.username);
+      // 获取用户id 从中间件传递的信息中获取用户id
+      const user_id = ctx.state.userInfo.id;
+      const userInfo = await ctx.service.user.getUserByName(ctx.state.userInfo.username);
       await ctx.service.user.editUserInfo({
         ...userInfo,
         signature,
         avatar,
       });
       setResponse(ctx, httpCode.SUCCESS, null, {
-        id: userId,
+        id: user_id,
         username: userInfo.username,
         signature,
         avatar,
