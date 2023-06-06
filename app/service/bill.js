@@ -15,12 +15,16 @@ class BillService extends Service {
     }
   }
 
-  async list(id) {
+  async list(id, page) {
     const { app } = this;
-    const QUERY_STR = 'id, pay_type, amount, bill_date, type_id, type_name, remark';
-    const sql = `select ${QUERY_STR} from bill where user_id = ${id}`;
     try {
-      const result = await app.mysql.query(sql);
+      const result = await app.mysql.select('bill', {
+        where: { user_id: id },
+        columns: [ 'id', 'pay_type', 'amount', 'bill_date', 'type_id', 'type_name', 'remark' ],
+        orders: [[ 'bill_date', 'desc' ], [ 'id', 'desc' ]],
+        limit: 10,
+        offset: (page - 1) * 10,
+      });
       return result;
     } catch (error) {
       console.log(error);

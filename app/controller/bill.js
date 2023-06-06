@@ -52,7 +52,7 @@ class BillController extends Controller {
 
       if (!decode) return;
       const user_id = decode.id;
-      const list = await ctx.service.bill.list(user_id);
+      const list = await ctx.service.bill.list(user_id, page);
 
       let totalExpendAmount = 0;
       let totalIncomeAmount = 0;
@@ -95,17 +95,14 @@ class BillController extends Controller {
           curr.push({ date, bills: [ item ] });
         }
         return curr;
-      }, []).sort((a, b) => moment(b.bill_date) - moment(a.bill_date));
-
-      // 分页处理，listMap 为我们格式化后的全部数据，还为分页
-      const filterListMap = listMap.slice((page - 1) * page_size, page * page_size);
+      }, []);
 
       // 返回数据
       setResponse(ctx, httpCode.SUCCESS, null, {
         totalExpendAmount,
         totalIncomeAmount,
         totalPage: Math.ceil(listMap.length / page_size),
-        list: filterListMap || [],
+        list: listMap || [],
       });
     } catch (error) {
       setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
