@@ -130,6 +130,7 @@ class BillController extends Controller {
     // 判空处理
     if (!id || !amount || !type_id || !type_name || !bill_date || !pay_type) {
       setResponse(ctx, httpCode.BAD_REQUEST, '参数错误');
+      return;
     }
 
     try {
@@ -176,7 +177,7 @@ class BillController extends Controller {
     // 获取用户id 从中间件传递的信息中获取用户id
     const user_id = ctx.state.userInfo.id;
     try {
-      const result = await ctx.service.bill.list(user_id);
+      const result = await ctx.service.bill.list(user_id, 1);
 
       const start = moment(date).startOf('month').unix() * 1000; // 选择月份，月初时间
       const end = moment(date).endOf('month').unix() * 1000; // 选择月份，月末时间
