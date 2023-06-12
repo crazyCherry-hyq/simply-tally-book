@@ -19,4 +19,6 @@ module.exports = app => {
   router.post('/api/bill/update', _jwt, controller.bill.update); // 编辑账单
   router.post('/api/bill/delete', _jwt, controller.bill.delete); // 删除账单
   router.get('/api/bill/statistics', _jwt, controller.bill.statistics); // 获取统计账单接口
+  // 账单类型管理
+  router.get('/api/type/list', _jwt, controller.type.getBillTypeList); // 获取账单类型列表
 };
