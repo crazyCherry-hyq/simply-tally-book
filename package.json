@@ -13,7 +13,8 @@
     "egg-mysql": "^4.0.0",
     "egg-scripts": "^2",
     "mkdirp": "^3.0.1",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "svg-captcha": "^1.4.0"
   },
   "devDependencies": {
     "egg-bin": "^5",

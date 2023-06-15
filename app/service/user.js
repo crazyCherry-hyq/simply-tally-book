@@ -1,6 +1,7 @@
 'use strict';
 
 const Service = require('egg').Service;
+const svgCaptcha = require('svg-captcha')
 
 class UserService extends Service {
   // 通过用户名获取用户信息
@@ -27,6 +28,7 @@ class UserService extends Service {
     }
   }
 
+  // 编辑用户信息
   async editUserInfo(params) {
     const { ctx, app } = this;
     try {
@@ -36,6 +38,14 @@ class UserService extends Service {
       console.log(error);
       return null;
     }
+  }
+
+  // 获取验证码
+  async captcha() {
+    const captcha = svgCaptcha.create({});
+    this.ctx.session.code = captcha.text;
+    console.log(this.ctx.session.code);
+    return captcha;
   }
 }
 

@@ -8,17 +8,22 @@ class UserController extends Controller {
   // 用户注册
   async register() {
     const { ctx } = this;
-    const { username, password } = ctx.request.body; // 获取注册需要的参数
-
+    const { username, password, code } = ctx.request.body; // 获取注册需要的参数
+    // 判断用户名和密码是否为空
     if (!username || !password) {
-      setResponse(ctx, httpCode.SUCCESS, '账号密码不能为空');
+      setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '账号密码不能为空');
+      return;
+    }
+    // 比较用户输入的验证码和存储的验证码
+    if (this.ctx.session.code.toLowerCase() !== code.toLowerCase()) {
+      setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '验证码输入有误，请重新输入');
       return;
     }
 
     // 根据用户名，在数据库查找相对应的id操作
     const userInfo = await ctx.service.user.getUserByName(username);
     if (userInfo && userInfo.id) {
-      setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '账户名已被注册，请重新输入');
+      setResponse(ctx, httpCode.SUCCESS, '账户名已被注册，请重新输入');
     } else {
       const encryptedPassword = encryptPassword(password);
       const result = await ctx.service.user.register({
@@ -94,6 +99,11 @@ class UserController extends Controller {
     }
   }
 
+  async verify() {
+    const { ctx } = this;
+    const result = await this.service.user.captcha();
+    setResponse(ctx, httpCode.SUCCESS, '', result.data);
+  }
 }
 
 module.exports = UserController;
