@@ -8,8 +8,8 @@ class TypeController extends Controller {
   async getBillTypeList() {
     const { ctx } = this;
     const userId = ctx.state.userInfo.id;
-    const expenseBillTypeList = await ctx.service.type.getBillTypeByPayType(1, 0);
-    const incomeBillTypeList = await ctx.service.type.getBillTypeByPayType(2, 0);
+    const expenseBillTypeList = await ctx.service.type.getBillTypeByPayType(1, userId);
+    const incomeBillTypeList = await ctx.service.type.getBillTypeByPayType(2, userId);
     setResponse(ctx, httpCode.SUCCESS, null, {
       expenseBillTypeList,
       incomeBillTypeList,

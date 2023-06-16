@@ -41,7 +41,7 @@ class BillController extends Controller {
   async list() {
     const { ctx } = this;
     // 获取， 日期 date， 分页数据， 类型 type_id, 这些都是前端传给后端的数据
-    const { date, page = 1, page_size = 5, type_id = 'all' } = ctx.query;
+    const { date, page = 1, type_id = 'all' } = ctx.query;
 
     try {
       // 获取用户id 从中间件传递的信息中获取用户id
@@ -96,7 +96,7 @@ class BillController extends Controller {
       setResponse(ctx, httpCode.SUCCESS, null, {
         totalExpendAmount,
         totalIncomeAmount,
-        totalPage: Math.ceil(listMap.length / page_size),
+        totalPage: listMap.length,
         list: listMap || [],
       });
     } catch (error) {
