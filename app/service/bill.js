@@ -71,6 +71,30 @@ class BillService extends Service {
     }
   }
 
+  async getTotalsByType(userId, date) {
+    const { app } = this;
+    try {
+      const sql = `
+        SELECT t.name AS type_name, SUM(b.amount) AS total_amount
+FROM type AS t
+LEFT JOIN (
+    SELECT type_id, amount
+    FROM bill
+    WHERE user_id IN (0, 1) AND DATE_FORMAT(bill_date, '%Y-%m') = ${date}
+) AS b ON b.type_id = t.id
+WHERE t.user_id IN (0, 1)
+GROUP BY t.name;
+      `;
+      console.log(userId, date);
+      const result = await app.mysql.query(sql);
+      console.log(result);
+      return result;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
 }
 
 module.exports = BillService;

@@ -223,6 +223,18 @@ class BillController extends Controller {
       setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
     }
   }
+
+  async totalsByType() {
+    const { ctx } = this;
+    const { date } = ctx.query;
+    const userId = ctx.state.userInfo.id;
+    try {
+      const list = await ctx.service.bill.getTotalsByType(userId, date);
+      setResponse(ctx, httpCode.SUCCESS, null, list);
+    } catch (error) {
+      setResponse(ctx, httpCode.INTERNAL_SERVER_ERROR, '系统错误');
+    }
+  }
 }
 
 module.exports = BillController;
